@@ -32,19 +32,20 @@ function App() {
       };
   
       const result = await axios.request(options)
-      return result.data
+      console.log(result);
+      return result.data.file_name; // return file_name instead of result.data
     }
   }, [])
 
-  const deepgramProcessing = useCallback(async (data: any) => {
-    if (data) {
+  const deepgramProcessing = useCallback(async (fileName: any) => {
+    if (fileName) {
       const options = {
         method: 'POST',
         url: '/api/get_transcript',
         headers: {
           accept: 'application/json',
         },
-        data: data
+        file_name: fileName // send file_name as the body
       };
   
       const result = await axios.request(options)
@@ -53,8 +54,8 @@ function App() {
     }
   }, [])
 
-  const openAICompletion = useCallback(async (text: string) => {
-    if (text) {
+  const openAICompletion = useCallback(async (fileName: string) => {
+    if (fileName) {
       const options = {
         method: 'POST',
         url: '/api/get_script',
@@ -62,7 +63,11 @@ function App() {
           accept: 'application/json',
         },
         data: {
-          transcript: text
+          fileName: fileName,
+          setOrCloseCall: 'close',
+          generateSingleSpeakerFiles: true,
+          useSingleSpeakerText: true,
+          useContinue: true
         }
       };
   
@@ -74,11 +79,11 @@ function App() {
 
 
   const handleScripting = useCallback(async (file: File) => {
-    const fileInfo = await uploadFile(file);
-    const text = await deepgramProcessing(fileInfo);
+    const fileName = await uploadFile(file);
+    await deepgramProcessing(fileName);
     setUploading(false)
     setAnalysing(true)
-    const script = await openAICompletion(text);
+    const script = await openAICompletion(fileName);
     let formatted_script = "";
     const script_lines = script.split('\n');
     for (const script_line of script_lines) {
