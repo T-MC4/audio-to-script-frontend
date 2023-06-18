@@ -1,0 +1,44 @@
+.App {
+  text-align: center;
+  max-width: 100%;
+  width: 700px;
+  padding: 50px;
+}
+
+.title {
+  background: -webkit-linear-gradient(271deg, #0032F6, #1DCAF8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.juBESy {
+  display: block;
+  height: 100%;
+}
+
+.ejTjHV {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100%;
+  height: 100%;
+  opacity: 1 !important;
+}
+
+.ejTjHV > span {
+  width: 100%;
+  left: 0 !important;
+  right: 0;
+  transform: none !important;
+}
+
+.Typewriter__wrapper {
+  text-align: left;
+}
+
+.Typewriter__wrapper span {
+  margin-bottom: 14px;
+}
+
+.Typewriter__wrapper span {
+  text-align: left;
+}
