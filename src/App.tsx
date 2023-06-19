@@ -79,7 +79,7 @@ function App() {
                     fileName: fileName,
                     // setOrCloseCall: setOrCloseCall || 'close',
                     // generateSingleSpeakerFiles:
-                    //  s   String(generateSingleSpeakerFiles) || 'true',
+                    //     String(generateSingleSpeakerFiles) || 'true',
                     // useSingleSpeakerText:
                     //     String(useSingleSpeakerText) || 'true',
                     // useContinue: String(useContinue) || 'true',
@@ -88,6 +88,7 @@ function App() {
                 const eventSource = new EventSource(url.toString());
 
                 eventSource.onmessage = (event) => {
+                    setAnalysing(false);
                     const result = JSON.parse(event.data);
                     console.log(result);
 
@@ -96,6 +97,7 @@ function App() {
 
                     // If the process is done, close the connection
                     if (result.done) {
+                        setScriptRendered(true);
                         eventSource.close();
                     }
                 };
@@ -114,13 +116,11 @@ function App() {
 
             setAnalysing(true);
             await deepgramProcessing(fileName);
-            setAnalysing(false);
             // setEventData('true');
 
             setScriptRendered(false);
             openAICompletion(fileName);
             // openAICompletion(fileName, 'close', true, true, true);
-            setScriptRendered(true);
         },
         [uploadFile, deepgramProcessing, openAICompletion]
     );
