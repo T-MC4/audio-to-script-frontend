@@ -220,7 +220,10 @@ function App() {
                                     <div
                                         className="Typewriter__wrapper"
                                         dangerouslySetInnerHTML={{
-                                            __html: eventData,
+                                            __html: eventData.replace(
+                                                /(?:\r\n|\r|\n)/g,
+                                                '<br>'
+                                            ),
                                         }}
                                     ></div>
                                     // <TypewriterComponent
