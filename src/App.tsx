@@ -102,6 +102,12 @@ function App() {
                     }
                 };
 
+                // Handle any errors
+                eventSource.onerror = function (err) {
+                    console.error('EventSource failed:', err);
+                    eventSource.close();
+                };
+
                 return eventSource;
             }
         },
