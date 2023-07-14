@@ -70,6 +70,7 @@ function App() {
             useSingleSpeakerText?: boolean,
             useContinue?: boolean
         ) => {
+            console.log('API server #3: ', process.env.REACT_APP_API_SERVER);
             if (fileName) {
                 const url = new URL(
                     `${process.env.REACT_APP_API_SERVER}/api/get_script`
