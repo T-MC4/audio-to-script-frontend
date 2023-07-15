@@ -233,25 +233,15 @@ function App() {
                                             ),
                                         }}
                                     ></div>
-                                    // <TypewriterComponent
-                                    //     onInit={(typewriter) => {
-                                    //         typewriter
-                                    //             .typeString(script)
-                                    //             .callFunction(() => {
-                                    //                 setScriptRendered(true);
-                                    //             })
-                                    //             .start();
-                                    //     }}
-                                    //     options={{
-                                    //         delay: 20,
-                                    //     }}
-                                    // />
                                 )}
                                 {scriptRendered && (
                                     <div
                                         className="Typewriter__wrapper"
                                         dangerouslySetInnerHTML={{
-                                            __html: eventData,
+                                            __html: eventData.replace(
+                                                /(?:\r\n|\r|\n)/g,
+                                                '<br>'
+                                            ),
                                         }}
                                     ></div>
                                 )}
