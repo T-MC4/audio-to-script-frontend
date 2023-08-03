@@ -5,7 +5,7 @@ import { getScript } from '../api/getScript';
 import AudioRecordUploader from '../components/AudioRecordUploader';
 import '../App.css';
 import Loader from '../components/Loader';
-import GeneratedScriptOutput from './GeneratedScriptOutput';
+import GeneratedScriptOutput from '../components/GeneratedScriptOutput';
 import { ValidationError, errorLabels } from '../constants';
 
 function AudioToScript() {

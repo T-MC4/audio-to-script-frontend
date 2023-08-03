@@ -3,7 +3,7 @@ import '../App.css';
 import { ValidationError, errorLabels } from '../constants';
 import { getScript } from '../api/getScript';
 import Loader from '../components/Loader';
-import GeneratedScriptOutput from './GeneratedScriptOutput';
+import GeneratedScriptOutput from '../components/GeneratedScriptOutput';
 
 const ScriptToFormattedScript = () => {
     const [originalScript, setOriginalScript] = useState('')
