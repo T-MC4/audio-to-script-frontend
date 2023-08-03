@@ -1,188 +1,96 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { FileUploader } from 'react-drag-drop-files';
+import React, { useCallback, useRef, useState } from 'react';
 import { ClipLoader } from 'react-spinners';
-// import TypewriterComponent from 'typewriter-effect';
-import axios from './axios';
-import UploadIcon from './assets/upload_icon.png';
+import { uploadFile } from './api/uploadFile'
 import './App.css';
+import { getTranscript } from './api/getTranscript';
+import { getScript } from './api/getScript';
+import AudioRecordUploader from './AudioRecordUploader';
 
-const fileTypes = ['WAV', 'MP3', 'MP4', 'WEBM'];
+enum ValidationError {
+    fileSize = 'fileSize',
+    contextLimit = 'contextLimit'
+}
+
+const errorLabels = {
+    [ValidationError.fileSize]: 'File size ololo todo',
+    [ValidationError.contextLimit]: 'context-limit-exceeded',
+} as const
 
 function App() {
-    const [file, setFile] = useState<File | null>(null);
+    const [error, setError] = useState<ValidationError | undefined>()
     const [uploading, setUploading] = useState(false);
     const [analysing, setAnalysing] = useState(false);
-    const [eventData, setEventData] = useState('');
-    // const [script, setScript] = useState('');
+    const [loaded, setLoaded] = useState(false);
     const [scriptRendered, setScriptRendered] = useState(false);
-    const handleChange = (file: File) => {
-        setFile(file);
-    };
-    console.log(file);
+    const scriptDiv = useRef<HTMLDivElement>(null)
+    const bottomRef = useRef<HTMLDivElement>(null)
+    const scriptText = useRef('');
 
-    const uploadFile = useCallback(async (file: File) => {
-        console.log('API server #1: ', process.env.REACT_APP_API_SERVER);
-        console.log(axios.defaults.baseURL);
-        if (file) {
-            const fromData = new FormData();
-            fromData.append('record', file!);
-            const options = {
-                method: 'POST',
-                url: '/api/upload_record',
-                headers: {
-                    accept: 'application/json',
-                },
-                data: fromData,
-            };
+    const openAICompletion = useCallback(async (transcript: string) => {
+        const response = await getScript(transcript);
+        if (response.ok) {
+            setLoaded(true)
+            setError(undefined)
 
-            const result = await axios.request(options);
-            console.log(result.data.file_name);
-            return result.data.file_name; // return file_name instead of result.data
-        }
-    }, []);
+            scriptText.current = '';
+            for (const reader = response.body!.getReader(); ;) {
+                const { value, done } = await reader.read();
 
-    const deepgramProcessing = useCallback(async (fileName: any) => {
-        console.log('API server #2: ', process.env.REACT_APP_API_SERVER);
-        console.log(axios.defaults.baseURL);
+                if (done) {
+                    console.log('DONE')
+                    setScriptRendered(true);
+                    break;
+                }
 
-        if (fileName) {
-            const options = {
-                method: 'POST',
-                url: '/api/get_transcript',
-                headers: {
-                    accept: 'application/json',
-                },
-                data: { file_name: fileName }, // send file_name as the body
-            };
+                const chunk = new TextDecoder().decode(value);
+                scriptText.current += chunk;
+                console.log('chunk:', chunk)
 
-            const result = await axios.request(options);
-            console.log(result.data);
-
-            return result.data.file_name;
-        }
-    }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
-
-    const openAICompletion = useCallback(
-        (
-            fileName: string,
-            setOrCloseCall?: string,
-            generateSingleSpeakerFiles?: boolean,
-            useSingleSpeakerText?: boolean,
-            useContinue?: boolean
-        ) => {
-            console.log('API server #3: ', process.env.REACT_APP_API_SERVER);
-            if (fileName) {
-                const url = new URL(
-                    `${process.env.REACT_APP_API_SERVER}/api/get_script`
-                );
-
-                url.search = new URLSearchParams({
-                    fileName: fileName,
-                    // setOrCloseCall: setOrCloseCall || 'close',
-                    // generateSingleSpeakerFiles:
-                    //     String(generateSingleSpeakerFiles) || 'true',
-                    // useSingleSpeakerText:
-                    //     String(useSingleSpeakerText) || 'true',
-                    // useContinue: String(useContinue) || 'true',
-                }).toString();
-
-                const eventSource = new EventSource(url.toString());
-
-                eventSource.onmessage = (event) => {
-                    setAnalysing(false);
-                    const result = JSON.parse(event.data);
-                    console.log(result);
-
-                    // Append new data to the existing string
-                    setEventData((prevData) => prevData + result);
-
-                    // If the process is done, close the connection
-                    if (result.done) {
-                        setScriptRendered(true);
-                        eventSource.close();
-                    }
-                };
-
-                // Handle any errors
-                eventSource.onerror = function (err) {
-                    console.error('EventSource failed:', err);
-                    eventSource.close();
-                };
-
-                return eventSource;
+                if (scriptDiv.current) {
+                    scriptDiv.current.innerHTML = scriptText.current
+                }
+                if (bottomRef.current) {
+                    bottomRef.current?.scrollIntoView();
+                }
             }
-        },
-        [] // Empty dependency array means this effect runs once on mount and clean up on unmount
-    );
+        } else {
+            setError(ValidationError.contextLimit)
+            // TODO: display error in UI
+            console.log('err')
+        }
+    }, [setLoaded, setScriptRendered])
 
     const handleScripting = useCallback(
         async (file: File) => {
-            const fileName: string = await uploadFile(file);
-            console.log('fileName: ', fileName);
+            setUploading(true);
+            const uploadedFileData = await uploadFile(file);
             setUploading(false);
 
             setAnalysing(true);
-            await deepgramProcessing(fileName);
-            // setEventData('true');
+            const { transcript } = await getTranscript(uploadedFileData);
+            setAnalysing(false);
 
             setScriptRendered(false);
-            openAICompletion(fileName);
-            // openAICompletion(fileName, 'close', true, true, true);
+            await openAICompletion(transcript);
         },
-        [uploadFile, deepgramProcessing, openAICompletion]
+        [uploadFile, openAICompletion]
     );
 
-    const handleCopy = useCallback(async () => {
-        const dataToCopy =
-            typeof eventData === 'object'
-                ? JSON.stringify(eventData, null, 2)
-                : eventData;
-        if (dataToCopy) {
-            await navigator.clipboard.writeText(dataToCopy);
+    const handleCopy = useCallback(() => {
+        if (scriptText.current) {
+            navigator.clipboard.writeText(scriptText.current);
         } else {
             console.error('No data to copy');
         }
-    }, [eventData]);
-
-    useEffect(() => {
-        if (file) {
-            handleScripting(file).catch(console.error);
-        }
-    }, [file, handleScripting]);
+    }, [])
 
     return (
         <div className="App">
             <div className="container">
-                {!uploading && !analysing && !eventData && (
+                {!uploading && !analysing && !loaded && (
                     <>
-                        <h2 className="text-3xl font-bold mb-4 title">
-                            Upload A Call Recording
-                        </h2>
-                        <p className="mb-8">
-                            Clone your best rep by uploading a call recording
-                            from them and we'll magically create a script for
-                            your Air Agent to follow based on it.{' '}
-                        </p>
-                        <div className="h-320px">
-                            <FileUploader
-                                handleChange={handleChange}
-                                name="file"
-                                types={fileTypes}
-                            >
-                                <div className="w-full text-center border border-dotted border-black rounded-xl p-4 h-full flex flex-col justify-center items-center cursor-pointer">
-                                    <img
-                                        src={UploadIcon}
-                                        width={32}
-                                        className="mb-4"
-                                        alt="upload-icon"
-                                    />
-                                    <p>Click to upload audio from computer</p>
-                                    <p className="text-gray-500">
-                                        or drag and drop here
-                                    </p>
-                                </div>
-                            </FileUploader>
-                        </div>
+                        <AudioRecordUploader onUpload={handleScripting} onError={() => setError(ValidationError.fileSize)} />
+                        {!!error && (<div className='text-red-600 mt-2'>{errorLabels[error]}</div>)}
                     </>
                 )}
                 {uploading && (
@@ -209,7 +117,7 @@ function App() {
                         </div>
                     </>
                 )}
-                {!analysing && !uploading && eventData && (
+                {!analysing && !uploading && loaded && (
                     <>
                         {!scriptRendered && (
                             <h2 className="text-3xl font-bold title">
@@ -223,28 +131,11 @@ function App() {
                         )}
                         <div className="h-320px w-full mt-8">
                             <div className="w-full text-left border border-solid border-black rounded-xl p-4 h-full flex flex-col justify-start items-start overflow-auto">
-                                {!scriptRendered && (
-                                    <div
-                                        className="Typewriter__wrapper"
-                                        dangerouslySetInnerHTML={{
-                                            __html: eventData.replace(
-                                                /(?:\r\n|\r|\n)/g,
-                                                '<br>'
-                                            ),
-                                        }}
-                                    ></div>
-                                )}
-                                {scriptRendered && (
-                                    <div
-                                        className="Typewriter__wrapper"
-                                        dangerouslySetInnerHTML={{
-                                            __html: eventData.replace(
-                                                /(?:\r\n|\r|\n)/g,
-                                                '<br>'
-                                            ),
-                                        }}
-                                    ></div>
-                                )}
+                                <div
+                                    className="Typewriter__wrapper"
+                                    ref={scriptDiv}
+                                ></div>
+                                <div ref={bottomRef} />
                             </div>
                         </div>
                         <div className="w-full flex justify-center mt-4">
