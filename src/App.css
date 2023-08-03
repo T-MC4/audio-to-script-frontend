@@ -30,16 +30,3 @@
   right: 0;
   transform: none !important;
 }
-
-.Typewriter__wrapper {
-  text-align: left;
-  white-space: pre-line;
-}
-
-.Typewriter__wrapper span {
-  margin-bottom: 14px;
-}
-
-.Typewriter__wrapper span {
-  text-align: left;
-}

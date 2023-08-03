@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileUploader } from 'react-drag-drop-files';
-import UploadIcon from './assets/upload_icon.png';
+import UploadIcon from '../assets/upload_icon.png';
 
 const fileTypes = ['WAV', 'MP3', 'MP4', 'WEBM'];
 const maxFileSizeMb = 200;
