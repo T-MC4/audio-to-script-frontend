@@ -73,7 +73,7 @@ function App() {
             setScriptRendered(false);
             await openAICompletion(transcript);
         },
-        [uploadFile, openAICompletion]
+        [openAICompletion]
     );
 
     const handleCopy = useCallback(() => {
