@@ -2,13 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
-import AudioToScript from './features/AudioToScript';
-import ScriptToFormattedScript from './features/ScriptToFormattedScript';
-
-enum AppType {
-  audioToScript = 'audio-recording-to-script',
-  scriptToFormattedScript = 'script-to-formatted-script'
-}
+import MagicalGenerator from './features/MagicalGenerator';
+import { Flow, TranscriptSource, flowQueryParam, transcriptSourceQueryParam } from './constants';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -16,15 +11,22 @@ const root = ReactDOM.createRoot(
 
 // This is a quick hack to avoid multiple branches
 const App = () => {
-  if (process.env.NODE_ENV === 'development') return <div className='flex'>
-    <AudioToScript />
-    <ScriptToFormattedScript />
-  </div>
+  const params = new URLSearchParams(window.location.search);
+  const flow = params.get(flowQueryParam) as Flow | null;
+  const transcriptSource = params.get(transcriptSourceQueryParam) as TranscriptSource | null;
 
-  if (process.env.REACT_APP_APP_TYPE === AppType.audioToScript) return <AudioToScript />
-  else if (process.env.REACT_APP_APP_TYPE === AppType.scriptToFormattedScript) return <ScriptToFormattedScript />
-
-  return null;
+  if (
+    !flow ||
+    !transcriptSource ||
+    !Object.values(Flow).includes(flow) ||
+    !Object.values(TranscriptSource).includes(transcriptSource)
+  ) {
+    return null;
+  } else {
+    return (
+      <MagicalGenerator transcriptSource={transcriptSource} flow={flow} />
+    )
+  }
 }
 
 root.render(

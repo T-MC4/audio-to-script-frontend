@@ -1,6 +1,7 @@
+import { TranscriptSource } from '../constants'
 const baseUrl = process.env.REACT_APP_API_SERVER
 
-export const getScript = (transcript: string) =>
+export const getScript = (transcript: string, transcript_source: TranscriptSource) =>
     fetch(`${baseUrl}/api/script/generate`, {
         method: "POST",
         headers: {
@@ -8,6 +9,8 @@ export const getScript = (transcript: string) =>
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            transcript: transcript
+            transcript: transcript,
+            transcript_source: transcript_source
         }),
     });
+

@@ -1,15 +1,14 @@
 import React from 'react';
 import { FileUploader } from 'react-drag-drop-files';
 import UploadIcon from '../assets/upload_icon.png';
+import Title from './Title';
 
 const fileTypes = ['WAV', 'MP3', 'MP4', 'WEBM'];
 const maxFileSizeMb = 200;
 
 const AudioRecordUploader = ({ onUpload, onError }: { onUpload: (file: File) => void; onError: () => void }) => (
     <>
-        <h2 className="text-3xl font-bold mb-4 title">
-            Upload A Call Recording
-        </h2>
+        <Title>Upload A Call Recording</Title>
         <p className="mb-8">
             Clone your best rep by uploading a call recording
             from them and we'll magically create a script for

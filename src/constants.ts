@@ -5,7 +5,22 @@ export enum ValidationError {
 }
 
 export const errorLabels = {
-    [ValidationError.fileSize]: 'File size ololo todo',
-    [ValidationError.contextLimit]: 'context-limit-exceeded',
-    [ValidationError.transcriptMissing]: 'transcript-missing',
+    [ValidationError.fileSize]: 'The file size should not exceed 200 MB.',
+    [ValidationError.contextLimit]: 'Input exceeds allowed limit. Please provide a shorter input.',
+    [ValidationError.transcriptMissing]: 'Transcript missing.',
 } as const
+
+export enum TranscriptSource {
+    audioToScript = 'audio-to-script',
+    copyPasteToScript = 'copy-paste-to-script'
+}
+
+export enum Flow {
+    salesAdvanced = 'sales-advanced',
+    customerServiceAdvanced = 'customer-service-advanced',
+    standardScriptOnly = 'standard-script-only',
+}
+
+export const flowQueryParam = 'flow'
+
+export const transcriptSourceQueryParam = 'transcript_source'
