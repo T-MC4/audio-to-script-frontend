@@ -30,6 +30,15 @@ function MagicalGenerator({ transcriptSource, flow }: Props) {
     const scriptText = useRef('');
     const lastTranscript = useRef('');
 
+    const resetState = () => {
+        setUploading(false);
+        setAnalysing(false);
+        setLoaded(false);
+        setScriptRendered(false);
+        setFinalizedScript(undefined);
+        setScriptCopied(false);
+    }
+
     const openAICompletion = useCallback(async (transcript: string) => {
         const response = await getScript(transcript, TranscriptSource.audioToScript);
         if (response.ok) {
@@ -67,15 +76,20 @@ function MagicalGenerator({ transcriptSource, flow }: Props) {
 
     const handleAudioScripting = useCallback(
         async (file: File) => {
-            setUploading(true);
-            const uploadedFileData = await uploadFile(file);
-            setUploading(false);
+            try {
+                setUploading(true);
+                const uploadedFileData = await uploadFile(file);
+                setUploading(false);
 
-            setAnalysing(true);
-            const { transcript } = await getTranscript(uploadedFileData);
-            lastTranscript.current = transcript;
-            setScriptRendered(false);
-            await openAICompletion(transcript);
+                setAnalysing(true);
+                const { transcript } = await getTranscript(uploadedFileData);
+                lastTranscript.current = transcript;
+                setScriptRendered(false);
+                await openAICompletion(transcript);
+            } catch (err) {
+                resetState();
+                setError(ValidationError.default)
+            }
         },
         [openAICompletion]
     );
