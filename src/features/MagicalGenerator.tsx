@@ -37,6 +37,8 @@ function MagicalGenerator({ transcriptSource, flow }: Props) {
         setScriptRendered(false);
         setFinalizedScript(undefined);
         setScriptCopied(false);
+        scriptText.current = '';
+        lastTranscript.current = '';
     }
 
     const openAICompletion = useCallback(async (transcript: string) => {

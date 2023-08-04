@@ -17,7 +17,7 @@ const CopyPasteUploader = ({ onSubmit }: { onSubmit: (text: string) => void }) =
         Upload your script and we'll automatically clean it up to make it much easier for your Air Agent to understand and follow.
       </p>
       <textarea
-        className='h-320px w-full border border-custom-color border-black rounded-xl p-4'
+        className='h-60 w-full border border-custom-color border-black rounded-xl p-4'
         value={originalScript}
         onChange={handleChange}
         placeholder='Copy and paste your original script here that you want to clean up...'
