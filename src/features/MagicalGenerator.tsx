@@ -42,7 +42,7 @@ function MagicalGenerator({ transcriptSource, flow }: Props) {
     }
 
     const openAICompletion = useCallback(async (transcript: string) => {
-        const response = await getScript(transcript, TranscriptSource.audioToScript);
+        const response = await getScript(transcript, transcriptSource);
         if (response.ok) {
             setAnalysing(false);
             setLoaded(true)
@@ -74,7 +74,7 @@ function MagicalGenerator({ transcriptSource, flow }: Props) {
             setLoaded(false)
             setScriptRendered(false)
         }
-    }, [setLoaded, setScriptRendered])
+    }, [setLoaded, setScriptRendered, transcriptSource])
 
     const handleAudioScripting = useCallback(
         async (file: File) => {

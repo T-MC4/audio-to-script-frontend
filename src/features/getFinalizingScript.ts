@@ -22,11 +22,18 @@ const wrapWithPromptTemplate = (script: string, flow: Flow.customerServiceAdvanc
     return template.replace(scriptPlaceholder, script);
 }
 
+const removeSurroundingQuotes = (script: string) => {
+    if (script.charAt(0) === '"' && script.charAt(script.length - 1) === '"')
+        return script.substring(1, script.length - 1);;
+    return script;
+}
+
 const getFinalizingScript = (
     script: string,
     flow: Flow
 ) => {
     let finalScript = script;
+    finalScript = removeSurroundingQuotes(finalScript);
     finalScript = removeScriptStart(finalScript);
     finalScript = removeRepLabel(finalScript);
 
