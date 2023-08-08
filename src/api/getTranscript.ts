@@ -1,14 +1,13 @@
 import axios from '../axios';
-import { UploadedFileData } from './uploadFile';
 
-export const getTranscript = async (data: UploadedFileData) => {
+export const getTranscript = async (filePath: string): Promise<{ transcript: string }> => {
     const options = {
         method: 'POST',
-        url: '/api/audio_recording/transcript',
+        url: '/api/transcripts',
         headers: {
             accept: 'application/json',
         },
-        data
+        data: { file_path: filePath }
     };
 
     const result = await axios.request(options);

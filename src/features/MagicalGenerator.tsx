@@ -7,10 +7,10 @@ import CopyPasteUploader from '../components/CopyPasteUploader';
 import '../App.css';
 import Loader from '../components/Loader';
 import GeneratedScriptOutput from '../components/GeneratedScriptOutput';
-import { Flow, TranscriptSource, ValidationError, errorLabels } from '../constants';
+import { Flow, TranscriptSource, ValidationError, errorLabels, getValidationError } from '../constants';
 import Button, { ButtonType } from '../components/Button';
 import Title from '../components/Title'
-import getFinalizingScript from './getFinalizingScript';
+import getFinalizedScript from './getFinalizedScript';
 
 type Props = {
     transcriptSource: TranscriptSource
@@ -42,7 +42,7 @@ function MagicalGenerator({ transcriptSource, flow }: Props) {
     }
 
     const openAICompletion = useCallback(async (transcript: string) => {
-        const response = await getScript(transcript, TranscriptSource.audioToScript);
+        const response = await getScript(transcript, transcriptSource);
         if (response.ok) {
             setAnalysing(false);
             setLoaded(true)
@@ -74,7 +74,7 @@ function MagicalGenerator({ transcriptSource, flow }: Props) {
             setLoaded(false)
             setScriptRendered(false)
         }
-    }, [setLoaded, setScriptRendered])
+    }, [setLoaded, setScriptRendered, transcriptSource])
 
     const handleAudioScripting = useCallback(
         async (file: File) => {
@@ -90,7 +90,7 @@ function MagicalGenerator({ transcriptSource, flow }: Props) {
                 await openAICompletion(transcript);
             } catch (err) {
                 resetState();
-                setError(ValidationError.default)
+                setError(getValidationError(err))
             }
         },
         [openAICompletion]
@@ -114,7 +114,7 @@ function MagicalGenerator({ transcriptSource, flow }: Props) {
     }, [finalizedScript])
 
     const handleFinalizeScript = () => {
-        setFinalizedScript(getFinalizingScript(scriptText.current, flow))
+        setFinalizedScript(getFinalizedScript(scriptText.current, flow))
     }
 
     const showUploader = !uploading && !analysing && !loaded;

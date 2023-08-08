@@ -22,7 +22,7 @@ const wrapWithPromptTemplate = (script: string, flow: Flow.customerServiceAdvanc
     return template.replace(scriptPlaceholder, script);
 }
 
-const getFinalizingScript = (
+const getFinalizedScript = (
     script: string,
     flow: Flow
 ) => {
@@ -45,4 +45,4 @@ const getFinalizingScript = (
     return finalScript;
 }
 
-export default getFinalizingScript;
+export default getFinalizedScript;

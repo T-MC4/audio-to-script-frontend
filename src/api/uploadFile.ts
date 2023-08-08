@@ -1,18 +1,22 @@
-import axios from '../axios';
+import { nanoid } from 'nanoid'
+import supabase from '../supabase';
+import { ValidationError } from '../constants';
 
-export type UploadedFileData = { file_name: string; mimetype: string }
-
-export const uploadFile: (file: File) => Promise<UploadedFileData> = async (file) => {
-    const fromData = new FormData();
-    fromData.append('record', file);
-    const options = {
-        method: 'POST',
-        url: '/api/audio_recording/upload',
-        headers: {
-            accept: 'application/json',
-        },
-        data: fromData,
-    };
-    const result = await axios.request(options);
-    return result.data;
+export const uploadFile = async (file: File) => {
+    try {
+        const fileExtension = file.name.split('.').pop() || '';
+        const { error, data } = await supabase
+            .storage
+            .from(process.env.REACT_APP_SUPABASE_BUCKET_NAME)
+            .upload(`${process.env.REACT_APP_SUPABASE_FOLDER_NAME}/${nanoid()}.${fileExtension}`, file, {
+                cacheControl: '3600',
+                upsert: false
+            })
+        if (error) {
+            throw new Error(ValidationError.uploadFile);
+        }
+        return data.path;
+    } catch (error) {
+        throw new Error(ValidationError.uploadFile);
+    }
 }
